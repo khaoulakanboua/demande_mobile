@@ -22,7 +22,7 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
   Future<void> addDemande() async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.11.1:8060/api/demande/save'),
+        Uri.parse('http://192.168.1.3:8060/api/demande/save'),
         headers: {
           'Content-Type': 'application/json',
         },

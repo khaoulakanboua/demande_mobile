@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'package:demande_mobile/ListDemande.dart';
+import 'package:demande_mobile/UserListDemande.dart';
 import 'package:demande_mobile/register.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+
 
 class LoginPage extends StatefulWidget {
   @override
@@ -31,11 +35,15 @@ class _LoginPageState extends State<LoginPage> {
 
         // Assuming the server returns a JWT in the response
         String jwtToken = responseData['accessToken'];
+         String username = responseData['username'];
         print('Login success: ${jwtToken}');
+        final prefs = await SharedPreferences.getInstance();
+         prefs.setString('token', jwtToken);
+         prefs.setString('username', username);
 
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MyHomePage()),
+          MaterialPageRoute(builder: (context) => UserListPage()),
         );
       } else {
         // Handle login error (e.g., show an error message)

@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'package:demande_mobile/addDemande.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 void main() {
   runApp(MyApp());
 }
 
-class DemandeDetails {
+class UserDemandeDetails {
   final String titre;
   final String description;
   final String comite;
@@ -16,7 +18,7 @@ class DemandeDetails {
   final DateTime dateDebut;
   final DateTime dateFin;
 
-  DemandeDetails({
+  UserDemandeDetails({
     required this.titre,
     required this.description,
     required this.comite,
@@ -26,8 +28,8 @@ class DemandeDetails {
     required this.dateFin,
   });
 
-  factory DemandeDetails.fromJson(Map<String, dynamic> json) {
-    return DemandeDetails(
+  factory UserDemandeDetails.fromJson(Map<String, dynamic> json) {
+    return UserDemandeDetails(
       titre: json['titre'],
       description: json['description'],
       comite: json['comite'],
@@ -48,17 +50,17 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.indigo)
             .copyWith(secondary: Colors.orange), // Set your accent color
       ),
-      home: MyHomePage(),
+      home: UserListPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class UserListPage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<UserListPage> {
   List<dynamic> demandeList = [];
 
   @override
@@ -82,8 +84,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> fetchData() async {
+  final prefs = await SharedPreferences.getInstance();
+  String? username = prefs.getString('username');
     final response =
-        await http.get(Uri.parse('http://192.168.1.3:8060/api/demande/all'));
+        await http.get(Uri.parse('http://192.168.1.3:8060/api/demande/findbyuser/${username}'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -94,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<void> showDetailsModal(DemandeDetails details) async {
+  Future<void> showDetailsModal(UserDemandeDetails details) async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -174,8 +178,8 @@ class _MyHomePageState extends State<MyHomePage> {
       );
 
       if (response.statusCode == 200) {
-        DemandeDetails details =
-            DemandeDetails.fromJson(json.decode(response.body));
+        UserDemandeDetails details =
+            UserDemandeDetails.fromJson(json.decode(response.body));
         showDetailsModal(details);
       } else {
         throw Exception('Failed to load details');
