@@ -59,33 +59,63 @@ class _RegistrationPageState extends State<RegistrationPage> {
             children: [
               TextField(
                 controller: usernameController,
-                decoration: InputDecoration(labelText: 'Username'),
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  border: OutlineInputBorder(),
+                ),
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: firstNameController,
-                decoration: InputDecoration(labelText: 'First Name'),
+                decoration: InputDecoration(
+                  labelText: 'First Name',
+                  border: OutlineInputBorder(),
+                ),
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: lastNameController,
-                decoration: InputDecoration(labelText: 'Last Name'),
+                decoration: InputDecoration(
+                  labelText: 'Last Name',
+                  border: OutlineInputBorder(),
+                ),
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                ),
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: phoneNumberController,
-                decoration: InputDecoration(labelText: 'Phone Number'),
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                  border: OutlineInputBorder(),
+                ),
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: passwordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
               ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () => registerUser(),
-                child: Text('Register'),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.blue, // Button color
+                  onPrimary: Colors.white, // Text color
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text('Register', style: TextStyle(fontSize: 16)),
+                ),
               ),
             ],
           ),

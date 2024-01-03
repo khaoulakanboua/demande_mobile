@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:demande_mobile/ListDemande.dart';
+import 'package:demande_mobile/register.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -45,6 +47,13 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void navigateToRegistration() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RegistrationPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,6 +65,11 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Text(
+              'Login',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
             TextField(
               controller: usernameController,
               decoration: InputDecoration(
@@ -84,6 +98,11 @@ class _LoginPageState extends State<LoginPage> {
                 child: Text('Login', style: TextStyle(fontSize: 16)),
               ),
             ),
+            SizedBox(height: 10),
+            TextButton(
+              onPressed: () => navigateToRegistration(),
+              child: Text('Don\'t have an account? Register here'),
+            ),
           ],
         ),
       ),
@@ -91,8 +110,4 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: LoginPage(),
-  ));
-}
+
