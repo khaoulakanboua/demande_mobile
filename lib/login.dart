@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:demande_mobile/ListDemande.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -30,15 +29,12 @@ class _LoginPageState extends State<LoginPage> {
 
         // Assuming the server returns a JWT in the response
         String jwtToken = responseData['accessToken'];
-         print('Login success: ${jwtToken}');
-          Navigator.push(
+        print('Login success: ${jwtToken}');
+
+        Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => MyHomePage()),
         );
-
-        // Store the token in a secure storage (e.g., flutter_secure_storage)
-        // Handle successful login (e.g., navigate to a new screen)
-        //Navigator.pushReplacementNamed(context, '/dashboard');
       } else {
         // Handle login error (e.g., show an error message)
         print('Login failed: ${response.reasonPhrase}');
@@ -62,17 +58,31 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             TextField(
               controller: usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+              decoration: InputDecoration(
+                labelText: 'Username',
+                border: OutlineInputBorder(),
+              ),
             ),
+            SizedBox(height: 10),
             TextField(
               controller: passwordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => loginUser(),
-              child: Text('Login'),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blue, // Button color
+                onPrimary: Colors.white, // Text color
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text('Login', style: TextStyle(fontSize: 16)),
+              ),
             ),
           ],
         ),
