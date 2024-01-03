@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:demande_mobile/ListDemande.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -30,6 +31,11 @@ class _LoginPageState extends State<LoginPage> {
         // Assuming the server returns a JWT in the response
         String jwtToken = responseData['accessToken'];
          print('Login success: ${jwtToken}');
+          Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MyHomePage()),
+        );
+
         // Store the token in a secure storage (e.g., flutter_secure_storage)
         // Handle successful login (e.g., navigate to a new screen)
         //Navigator.pushReplacementNamed(context, '/dashboard');
