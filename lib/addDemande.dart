@@ -16,23 +16,24 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
   TextEditingController descriptionController = TextEditingController();
   TextEditingController comiteController = TextEditingController();
   TextEditingController typeController = TextEditingController();
-  TextEditingController etatController = TextEditingController();
-  TextEditingController dateDebutController = TextEditingController();
-  TextEditingController dateFinController = TextEditingController();
+  DateTime? dateDebutController;
+  DateTime? dateFinController;
 
   Future<void> addDemande() async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.8.195:8060/api/demande/save'),
-        body: {
+        Uri.parse('http://192.168.11.1:8060/api/demande/save'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
           'titre': titreController.text,
           'description': descriptionController.text,
           'comite': comiteController.text,
           'type': typeController.text,
-          'etat': etatController.text,
-          'date_debut': dateDebutController.text,
-          'date_fin': dateFinController.text,
-        },
+          'date_debut': dateDebutController?.toIso8601String(),
+          'date_fin': dateFinController?.toIso8601String(),
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -40,10 +41,42 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
         // Notify the parent widget about the ajout
         widget.onDemandeAdded();
       } else {
+        print('Failed to add demande. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
         throw Exception('Failed to add demande');
       }
     } catch (e) {
       print('Error adding demande: $e');
+    }
+  }
+
+  Future<void> _selectDateDebut(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null && picked != dateDebutController) {
+      setState(() {
+        dateDebutController = picked;
+      });
+    }
+  }
+
+  Future<void> _selectDateFin(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null && picked != dateFinController) {
+      setState(() {
+        dateFinController = picked;
+      });
     }
   }
 
@@ -54,7 +87,7 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
       content: SingleChildScrollView(
         child: Column(
           children: [
-TextFormField(
+            TextFormField(
               controller: titreController,
               decoration: InputDecoration(labelText: 'Titre'),
             ),
@@ -70,17 +103,33 @@ TextFormField(
               controller: typeController,
               decoration: InputDecoration(labelText: 'Type'),
             ),
-            TextFormField(
-              controller: etatController,
-              decoration: InputDecoration(labelText: 'Etat'),
+            GestureDetector(
+              onTap: () => _selectDateDebut(context),
+              child: AbsorbPointer(
+                child: TextFormField(
+                  controller: TextEditingController(
+                    text: dateDebutController
+                            ?.toLocal()
+                            .toString()
+                            .split(' ')[0] ??
+                        '',
+                  ),
+                  decoration: InputDecoration(labelText: 'Date de début'),
+                ),
+              ),
             ),
-            TextFormField(
-              controller: dateDebutController,
-              decoration: InputDecoration(labelText: 'Date de début'),
-            ),
-            TextFormField(
-              controller: dateFinController,
-              decoration: InputDecoration(labelText: 'Date de fin'),
+            GestureDetector(
+              onTap: () => _selectDateFin(context),
+              child: AbsorbPointer(
+                child: TextFormField(
+                  controller: TextEditingController(
+                    text:
+                        dateFinController?.toLocal().toString().split(' ')[0] ??
+                            '',
+                  ),
+                  decoration: InputDecoration(labelText: 'Date de fin'),
+                ),
+              ),
             ),
           ],
         ),
