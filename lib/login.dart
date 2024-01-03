@@ -14,7 +14,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordController = TextEditingController();
 
   Future<void> loginUser() async {
-    final String url = 'http://192.168.1.3:8060/api/auth/signin';
+    final String url = 'http://192.168.8.195:8060/api/auth/signin';
 
     try {
       final response = await http.post(
@@ -90,8 +90,7 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
               onPressed: () => loginUser(),
               style: ElevatedButton.styleFrom(
-                primary: Colors.blue, // Button color
-                onPrimary: Colors.white, // Text color
+                foregroundColor: Colors.white, backgroundColor: Colors.blue, // Text color
               ),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
