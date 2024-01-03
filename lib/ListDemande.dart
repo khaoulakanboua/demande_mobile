@@ -45,7 +45,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter API Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.indigo).copyWith(secondary: Colors.orange), // Set your accent color
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.indigo)
+            .copyWith(secondary: Colors.orange), // Set your accent color
       ),
       home: MyHomePage(),
     );
@@ -82,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> fetchData() async {
     final response =
-        await http.get(Uri.parse('http://192.168.8.195:8060/api/demande/all'));
+        await http.get(Uri.parse('http://192.168.11.1:8060/api/demande/all'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -169,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> fetchDetails(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.8.195:8060/api/demande/id/$id'),
+        Uri.parse('http://192.168.11.1:8060/api/demande/id/$id'),
       );
 
       if (response.statusCode == 200) {
