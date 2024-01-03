@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:demande_mobile/ListDemande.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -76,8 +77,7 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
               onPressed: () => loginUser(),
               style: ElevatedButton.styleFrom(
-                primary: Colors.blue, // Button color
-                onPrimary: Colors.white, // Text color
+                foregroundColor: Colors.white, backgroundColor: Colors.blue, // Text color
               ),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
