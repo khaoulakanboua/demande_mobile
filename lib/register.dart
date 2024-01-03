@@ -16,7 +16,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   TextEditingController passwordController = TextEditingController();
 
   Future<void> registerUser() async {
-    final String url = 'http://192.168.1.3:8060/api/auth/signup';
+    final String url = 'http://192.168.8.195:8060/api/auth/signup';
 
     try {
       final response = await http.post(
@@ -109,8 +109,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ElevatedButton(
                 onPressed: () => registerUser(),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.blue, // Button color
-                  onPrimary: Colors.white, // Text color
+                  foregroundColor: Colors.white, backgroundColor: Colors.blue, // Text color
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),

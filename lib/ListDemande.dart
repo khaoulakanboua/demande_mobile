@@ -83,7 +83,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> fetchData() async {
     final response =
-        await http.get(Uri.parse('http://192.168.1.3:8060/api/demande/all'));
+
+        await http.get(Uri.parse('http://192.168.8.195:8060/api/demande/all'));
+
 
     if (response.statusCode == 200) {
       setState(() {
@@ -128,49 +130,128 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Demande List'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: fetchData,
-          ),
-        ],
-      ),
-      body: demandeList.isEmpty
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              itemCount: demandeList.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 3,
-                  margin: EdgeInsets.all(8),
-                  child: ListTile(
-                    title: Text(demandeList[index]['titre']),
-                    subtitle: Text(demandeList[index]['description']),
-                    onTap: () {
-                      fetchDetails(demandeList[index]['id']);
-                    },
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: demandeList.isEmpty
+        ? Center(
+            child: CircularProgressIndicator(),
+          )
+        : ListView.builder(
+            itemCount: demandeList.length,
+            itemBuilder: (context, index) {
+              String etat = demandeList[index]['etat'];
+              Color acceptButtonColor =
+                  etat == 'rejected' ? Colors.grey : Colors.green;
+              Color rejectButtonColor =
+                  etat == 'accepted' ? Colors.grey : Colors.red;
+
+              return Card(
+                elevation: 3,
+                margin: EdgeInsets.all(8),
+                child: ListTile(
+                  title: Text(demandeList[index]['titre']),
+                  subtitle: Text(
+                    demandeList[index]['etat'],
+                    style: TextStyle(
+                      color: etat == 'rejected' ? Colors.red : Colors.green,
+                    ),
                   ),
-                );
-              },
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: addDemande,
-        child: Icon(Icons.add),
-      ),
+                  trailing: etat == 'rejected' || etat == 'accepted'
+                      ? null // Don't show buttons if rejected or accepted
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                acceptDemande(demandeList[index]['id']);
+                              },
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                  acceptButtonColor,
+                                ),
+                                foregroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                              child: Text('Accepter'),
+                            ),
+                            SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: () {
+                                rejectDemande(demandeList[index]['id']);
+                              },
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                  rejectButtonColor,
+                                ),
+                                foregroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                              child: Text('Rejeter'),
+                            ),
+                          ],
+                        ),
+                  onTap: () {
+                    fetchDetails(demandeList[index]['id']);
+                  },
+                ),
+              );
+            },
+          ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: addDemande,
+      child: Icon(Icons.add),
+    ),
+  );
+}
+
+
+
+Future<void> acceptDemande(int id) async {
+  try {
+    final response = await http.put(
+      Uri.parse('http://192.168.8.195:8060/api/demande/accept/$id'),
     );
+
+    if (response.statusCode == 200) {
+      // Handle successful acceptance
+      fetchData(); // Refresh the list after updating
+    } else {
+      throw Exception('Failed to accept demande');
+    }
+  } catch (e) {
+    print('Error accepting demande: $e');
   }
+}
+
+Future<void> rejectDemande(int id) async {
+  try {
+    final response = await http.put(
+      Uri.parse('http://192.168.8.195:8060/api/demande/reject/$id'),
+    );
+
+    if (response.statusCode == 200) {
+      // Handle successful rejection
+      fetchData(); // Refresh the list after updating
+    } else {
+      throw Exception('Failed to reject demande');
+    }
+  } catch (e) {
+    print('Error rejecting demande: $e');
+  }
+}
+
 
   Future<void> fetchDetails(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.1.3:8060/api/demande/id/$id'),
+        Uri.parse('http://192.168.8.195:8060/api/demande/id/$id'),
       );
 
       if (response.statusCode == 200) {
