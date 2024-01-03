@@ -54,7 +54,7 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
       content: SingleChildScrollView(
         child: Column(
           children: [
-TextFormField(
+            TextFormField(
               controller: titreController,
               decoration: InputDecoration(labelText: 'Titre'),
             ),
@@ -77,10 +77,12 @@ TextFormField(
             TextFormField(
               controller: dateDebutController,
               decoration: InputDecoration(labelText: 'Date de début'),
+              keyboardType: TextInputType.datetime,
             ),
             TextFormField(
               controller: dateFinController,
               decoration: InputDecoration(labelText: 'Date de fin'),
+              keyboardType: TextInputType.datetime,
             ),
           ],
         ),
