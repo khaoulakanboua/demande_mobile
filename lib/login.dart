@@ -17,8 +17,8 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  Future<void> loginUser() async {
-    final String url = 'http://192.168.8.195:8060/api/auth/signin';
+   Future<void> loginUser() async {
+    final String url = 'http://192.168.168.124:8060/api/auth/signin';
 
     try {
       final response = await http.post(
@@ -33,18 +33,34 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
 
-        // Assuming the server returns a JWT in the response
         String jwtToken = responseData['accessToken'];
-         String username = responseData['username'];
-        print('Login success: ${jwtToken}');
-        final prefs = await SharedPreferences.getInstance();
-         prefs.setString('token', jwtToken);
-         prefs.setString('username', username);
+        String username = responseData['username'];
+        List<dynamic> roles = responseData['roles'];
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => UserListPage()),
-        );
+        print('Login success: ${jwtToken}');
+        print('User roles: $roles');
+
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', jwtToken);
+        prefs.setString('username', username);
+        prefs.setStringList('roles', roles.map((role) => role.toString()).toList());
+
+        // Navigate based on user roles
+        if (roles.contains('ROLE_ADMIN')) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MyHomePage()),
+          );
+        } else if (roles.contains('ROLE_USER')) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => UserListPage()),
+          );
+        } else {
+          // Handle other roles or navigate to a default page
+          print('Unknown user role. Navigating to a default page.');
+          // You can navigate to a default page or display an error message here.
+        }
       } else {
         // Handle login error (e.g., show an error message)
         print('Login failed: ${response.reasonPhrase}');

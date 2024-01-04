@@ -87,7 +87,7 @@ class _MyHomePageState extends State<UserListPage> {
   final prefs = await SharedPreferences.getInstance();
   String? username = prefs.getString('username');
     final response =
-        await http.get(Uri.parse('http://192.168.1.3:8060/api/demande/findbyuser/${username}'));
+        await http.get(Uri.parse('http://192.168.168.124:8060/api/demande/findbyuser/${username}'));
 
     if (response.statusCode == 200) {
       setState(() {

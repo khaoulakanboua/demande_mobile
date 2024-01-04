@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:demande_mobile/addDemande.dart';
+import 'package:demande_mobile/login.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -133,6 +136,15 @@ class _MyHomePageState extends State<MyHomePage> {
 @override
 Widget build(BuildContext context) {
   return Scaffold(
+    appBar: AppBar(
+      title: Text('Demande List'),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.exit_to_app),
+          onPressed: logout,
+        ),
+      ],
+    ),
     body: demandeList.isEmpty
         ? Center(
             child: CircularProgressIndicator(),
@@ -158,7 +170,7 @@ Widget build(BuildContext context) {
                     ),
                   ),
                   trailing: etat == 'rejected' || etat == 'accepted'
-                      ? null // Don't show buttons if rejected or accepted
+                      ? null
                       : Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -213,6 +225,7 @@ Widget build(BuildContext context) {
 
 
 
+
 Future<void> acceptDemande(int id) async {
   try {
     final response = await http.put(
@@ -246,6 +259,18 @@ Future<void> rejectDemande(int id) async {
     print('Error rejecting demande: $e');
   }
 }
+
+Future<void> logout() async {
+    // Clear shared preferences
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+
+    // Navigate back to the login page
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
 
 
   Future<void> fetchDetails(int id) async {
