@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 void main() {
   runApp(MyApp());
 }
 
 class UserDemandeDetails {
+  final int id;
   final String titre;
   final String description;
   final String comite;
@@ -19,6 +19,7 @@ class UserDemandeDetails {
   final DateTime dateFin;
 
   UserDemandeDetails({
+    required this.id,
     required this.titre,
     required this.description,
     required this.comite,
@@ -30,6 +31,7 @@ class UserDemandeDetails {
 
   factory UserDemandeDetails.fromJson(Map<String, dynamic> json) {
     return UserDemandeDetails(
+      id: json['id'] ?? 0, // Provide a default value, such as 0
       titre: json['titre'],
       description: json['description'],
       comite: json['comite'],
@@ -38,6 +40,18 @@ class UserDemandeDetails {
       dateDebut: DateTime.parse(json['date_debut']),
       dateFin: DateTime.parse(json['date_fin']),
     );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'titre': titre,
+      'description': description,
+      'comite': comite,
+      'type': type,
+      'etat': etat,
+      'date_debut': dateDebut.toIso8601String(),
+      'date_fin': dateFin.toIso8601String(),
+    };
   }
 }
 
@@ -84,10 +98,10 @@ class _MyHomePageState extends State<UserListPage> {
   }
 
   Future<void> fetchData() async {
-  final prefs = await SharedPreferences.getInstance();
-  String? username = prefs.getString('username');
-    final response =
-        await http.get(Uri.parse('http://192.168.1.3:8060/api/demande/findbyuser/${username}'));
+    final prefs = await SharedPreferences.getInstance();
+    String? username = prefs.getString('username');
+    final response = await http.get(Uri.parse(
+        'http://192.168.11.1:8060/api/demande/findbyuser/${username}'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -95,6 +109,22 @@ class _MyHomePageState extends State<UserListPage> {
       });
     } else {
       throw Exception('Failed to load data');
+    }
+  }
+
+  Future<void> deleteDemande(int id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('http://192.168.11.1:8060/api/demande/delete/$id'),
+      );
+
+      if (response.statusCode == 200) {
+        fetchData();
+      } else {
+        throw Exception('Failed to delete demande');
+      }
+    } catch (e) {
+      print('Error deleting demande: $e');
     }
   }
 
@@ -132,6 +162,136 @@ class _MyHomePageState extends State<UserListPage> {
     );
   }
 
+  Future<void> confirmDelete(int id) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmation'),
+          content: Text('Are you sure you want to delete this demande?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                deleteDemande(id);
+                Navigator.of(context).pop();
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> updateDemande(int id, UserDemandeDetails details) async {
+    try {
+      final response = await http.put(
+        Uri.parse('http://192.168.11.1:8060/api/demande/update/$id'),
+        body: json.encode(details.toJson()),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        fetchData();
+      } else {
+        throw Exception('Failed to update demande');
+      }
+    } catch (e) {
+      print('Error updating demande: $e');
+    }
+  }
+
+  Future<void> showEditModal(UserDemandeDetails details) async {
+    TextEditingController titreController =
+        TextEditingController(text: details.titre);
+    TextEditingController descriptionController =
+        TextEditingController(text: details.description);
+    TextEditingController comiteController =
+        TextEditingController(text: details.comite);
+    TextEditingController typeController =
+        TextEditingController(text: details.type);
+    TextEditingController etatController =
+        TextEditingController(text: details.etat);
+    TextEditingController dateDebutController =
+        TextEditingController(text: details.dateDebut.toIso8601String());
+    TextEditingController dateFinController =
+        TextEditingController(text: details.dateFin.toIso8601String());
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit Demande'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: titreController,
+                  decoration: InputDecoration(labelText: 'Titre'),
+                ),
+                TextField(
+                  controller: descriptionController,
+                  decoration: InputDecoration(labelText: 'Description'),
+                ),
+                TextField(
+                  controller: comiteController,
+                  decoration: InputDecoration(labelText: 'Comite'),
+                ),
+                TextField(
+                  controller: typeController,
+                  decoration: InputDecoration(labelText: 'Type'),
+                ),
+                TextField(
+                  controller: etatController,
+                  decoration: InputDecoration(labelText: 'Etat'),
+                ),
+                TextField(
+                  controller: dateDebutController,
+                  decoration: InputDecoration(labelText: 'Date de début'),
+                ),
+                TextField(
+                  controller: dateFinController,
+                  decoration: InputDecoration(labelText: 'Date de fin'),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                UserDemandeDetails updatedDetails = UserDemandeDetails(
+                  id: details.id,
+                  titre: titreController.text,
+                  description: descriptionController.text,
+                  comite: comiteController.text,
+                  type: typeController.text,
+                  etat: etatController.text,
+                  dateDebut: DateTime.parse(dateDebutController.text),
+                  dateFin: DateTime.parse(dateFinController.text),
+                );
+
+                updateDemande(details.id, updatedDetails);
+                Navigator.of(context).pop();
+              },
+              child: Text('Update'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -160,6 +320,25 @@ class _MyHomePageState extends State<UserListPage> {
                     onTap: () {
                       fetchDetails(demandeList[index]['id']);
                     },
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            // Call the method to show the edit modal
+                            showEditModal(UserDemandeDetails.fromJson(
+                                demandeList[index]));
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            confirmDelete(demandeList[index]['id']);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -174,7 +353,7 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> fetchDetails(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.1.3:8060/api/demande/id/$id'),
+        Uri.parse('http://192.168.11.1:8060/api/demande/id/$id'),
       );
 
       if (response.statusCode == 200) {

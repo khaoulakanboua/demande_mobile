@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -18,7 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordController = TextEditingController();
 
   Future<void> loginUser() async {
-    final String url = 'http://192.168.8.195:8060/api/auth/signin';
+    final String url = 'http://192.168.11.1:8060/api/auth/signin';
 
     try {
       final response = await http.post(
@@ -35,11 +33,11 @@ class _LoginPageState extends State<LoginPage> {
 
         // Assuming the server returns a JWT in the response
         String jwtToken = responseData['accessToken'];
-         String username = responseData['username'];
+        String username = responseData['username'];
         print('Login success: ${jwtToken}');
         final prefs = await SharedPreferences.getInstance();
-         prefs.setString('token', jwtToken);
-         prefs.setString('username', username);
+        prefs.setString('token', jwtToken);
+        prefs.setString('username', username);
 
         Navigator.push(
           context,
@@ -98,7 +96,8 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
               onPressed: () => loginUser(),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Colors.blue, // Text color
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue, // Text color
               ),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -116,5 +115,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
-
