@@ -362,16 +362,22 @@ class _MyHomePageState extends State<UserListPage> {
                     child: CircularProgressIndicator(),
                   )
                 : ListView.builder(
-                    itemCount: demandeList.length,
+                    itemCount: filteredDemandeList.isEmpty
+                        ? demandeList.length
+                        : filteredDemandeList.length,
                     itemBuilder: (context, index) {
+                      final displayedDemande = filteredDemandeList.isEmpty
+                          ? demandeList[index]
+                          : filteredDemandeList[index];
+
                       return Card(
                         elevation: 3,
                         margin: EdgeInsets.all(8),
                         child: ListTile(
-                          title: Text(demandeList[index]['titre']),
-                          subtitle: Text(demandeList[index]['description']),
+                          title: Text(displayedDemande['titre']),
+                          subtitle: Text(displayedDemande['description']),
                           onTap: () {
-                            fetchDetails(demandeList[index]['id']);
+                            fetchDetails(displayedDemande['id']);
                           },
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -381,15 +387,14 @@ class _MyHomePageState extends State<UserListPage> {
                                 onPressed: () {
                                   showEditModal(
                                     UserDemandeDetails.fromJson(
-                                      demandeList[index],
-                                    ),
+                                        displayedDemande),
                                   );
                                 },
                               ),
                               IconButton(
                                 icon: Icon(Icons.delete),
                                 onPressed: () {
-                                  confirmDelete(demandeList[index]['id']);
+                                  confirmDelete(displayedDemande['id']);
                                 },
                               ),
                             ],
