@@ -85,50 +85,52 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         title: Text('Login Page'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Login',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            TextField(
-              controller: usernameController,
-              decoration: InputDecoration(
-                labelText: 'Username',
-                border: OutlineInputBorder(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Login',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
+              SizedBox(height: 20),
+              TextField(
+                controller: usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => loginUser(),
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.blue, // Text color
+              SizedBox(height: 10),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Text('Login', style: TextStyle(fontSize: 16)),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => loginUser(),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blue, // Text color
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text('Login', style: TextStyle(fontSize: 16)),
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            TextButton(
-              onPressed: () => navigateToRegistration(),
-              child: Text('Don\'t have an account? Register here'),
-            ),
-          ],
+              SizedBox(height: 10),
+              TextButton(
+                onPressed: () => navigateToRegistration(),
+                child: Text('Don\'t have an account? Register here'),
+              ),
+            ],
+          ),
         ),
       ),
     );
