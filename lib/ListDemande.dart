@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> fetchData() async {
     final response =
-        await http.get(Uri.parse('http://192.168.1.3:8060/api/demande/all'));
+        await http.get(Uri.parse('http://192.168.56.1:8060/api/demande/all'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -102,9 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       filteredDemandeList = demandeList
           .where((demande) =>
-              demande['titre']
-                  .toLowerCase()
-                  .contains(query.toLowerCase()) ||
+              demande['titre'].toLowerCase().contains(query.toLowerCase()) ||
               demande['description']
                   .toLowerCase()
                   .contains(query.toLowerCase()))
@@ -262,7 +260,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> acceptDemande(int id) async {
     try {
       final response = await http.put(
-        Uri.parse('http://192.168.8.195:8060/api/demande/accept/$id'),
+        Uri.parse('http://192.168.56.1:8060/api/demande/accept/$id'),
       );
 
       if (response.statusCode == 200) {
@@ -278,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> rejectDemande(int id) async {
     try {
       final response = await http.put(
-        Uri.parse('http://192.168.1.3:8060/api/demande/reject/$id'),
+        Uri.parse('http:/192.168.56.1:8060/api/demande/reject/$id'),
       );
 
       if (response.statusCode == 200) {
@@ -304,7 +302,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> fetchDetails(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.8.195:8060/api/demande/id/$id'),
+        Uri.parse('http://192.168.56.1:8060/api/demande/id/$id'),
       );
 
       if (response.statusCode == 200) {

@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'package:demande_mobile/addDemande.dart';
+import 'package:demande_mobile/login.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
-void main() {
-  runApp(MyApp());
-}
 
 class UserDemandeDetails {
   final int id;
@@ -14,7 +11,7 @@ class UserDemandeDetails {
   final String description;
   final String comite;
   final String type;
-  final String etat;
+  final String? etat;
   final DateTime dateDebut;
   final DateTime dateFin;
 
@@ -24,14 +21,14 @@ class UserDemandeDetails {
     required this.description,
     required this.comite,
     required this.type,
-    required this.etat,
+    this.etat,
     required this.dateDebut,
     required this.dateFin,
   });
 
   factory UserDemandeDetails.fromJson(Map<String, dynamic> json) {
     return UserDemandeDetails(
-      id: json['id'] ?? 0, // Provide a default value, such as 0
+      id: json['id'] ?? 0,
       titre: json['titre'],
       description: json['description'],
       comite: json['comite'],
@@ -41,6 +38,7 @@ class UserDemandeDetails {
       dateFin: DateTime.parse(json['date_fin']),
     );
   }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -62,7 +60,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter API Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.indigo)
-            .copyWith(secondary: Colors.orange), // Set your accent color
+            .copyWith(secondary: Colors.orange),
       ),
       home: UserListPage(),
     );
@@ -76,6 +74,7 @@ class UserListPage extends StatefulWidget {
 
 class _MyHomePageState extends State<UserListPage> {
   List<dynamic> demandeList = [];
+  List<dynamic> filteredDemandeList = [];
 
   @override
   void initState() {
@@ -89,8 +88,7 @@ class _MyHomePageState extends State<UserListPage> {
       builder: (BuildContext context) {
         return AddDemandeWidget(
           onDemandeAdded: () {
-            // Called when a new demande is successfully added
-            fetchData(); // Refresh the list
+            fetchData();
           },
         );
       },
@@ -100,8 +98,9 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> fetchData() async {
     final prefs = await SharedPreferences.getInstance();
     String? username = prefs.getString('username');
-    final response = await http.get(Uri.parse(
-        'http://192.168.11.1:8060/api/demande/findbyuser/${username}'));
+    final response = await http.get(
+      Uri.parse('http://192.168.56.1:8060/api/demande/findbyuser/$username'),
+    );
 
     if (response.statusCode == 200) {
       setState(() {
@@ -115,7 +114,7 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> deleteDemande(int id) async {
     try {
       final response = await http.delete(
-        Uri.parse('http://192.168.11.1:8060/api/demande/delete/$id'),
+        Uri.parse('http://192.168.56.1:8060/api/demande/delete/$id'),
       );
 
       if (response.statusCode == 200) {
@@ -145,7 +144,6 @@ class _MyHomePageState extends State<UserListPage> {
                 Text('Etat: ${details.etat}'),
                 Text('Date de début: ${details.dateDebut}'),
                 Text('Date de fin: ${details.dateFin}'),
-                // Add other details as needed
               ],
             ),
           ),
@@ -192,7 +190,7 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> updateDemande(int id, UserDemandeDetails details) async {
     try {
       final response = await http.put(
-        Uri.parse('http://192.168.11.1:8060/api/demande/update/$id'),
+        Uri.parse('http://192.168.56.1:8060/api/demande/update/$id'),
         body: json.encode(details.toJson()),
         headers: {'Content-Type': 'application/json'},
       );
@@ -206,6 +204,24 @@ class _MyHomePageState extends State<UserListPage> {
     }
   }
 
+  void searchDemandes(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        // If the search query is empty, display all items
+        filteredDemandeList = List.from(demandeList);
+      } else {
+        // Otherwise, filter based on the search query
+        filteredDemandeList = demandeList
+            .where((demande) =>
+                demande['titre'].toLowerCase().contains(query.toLowerCase()) ||
+                demande['description']
+                    .toLowerCase()
+                    .contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
   Future<void> showEditModal(UserDemandeDetails details) async {
     TextEditingController titreController =
         TextEditingController(text: details.titre);
@@ -215,8 +231,6 @@ class _MyHomePageState extends State<UserListPage> {
         TextEditingController(text: details.comite);
     TextEditingController typeController =
         TextEditingController(text: details.type);
-    TextEditingController etatController =
-        TextEditingController(text: details.etat);
     TextEditingController dateDebutController =
         TextEditingController(text: details.dateDebut.toIso8601String());
     TextEditingController dateFinController =
@@ -247,16 +261,34 @@ class _MyHomePageState extends State<UserListPage> {
                   decoration: InputDecoration(labelText: 'Type'),
                 ),
                 TextField(
-                  controller: etatController,
-                  decoration: InputDecoration(labelText: 'Etat'),
-                ),
-                TextField(
                   controller: dateDebutController,
                   decoration: InputDecoration(labelText: 'Date de début'),
+                  onTap: () async {
+                    DateTime? date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (date != null) {
+                      dateDebutController.text = date.toIso8601String();
+                    }
+                  },
                 ),
                 TextField(
                   controller: dateFinController,
                   decoration: InputDecoration(labelText: 'Date de fin'),
+                  onTap: () async {
+                    DateTime? date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (date != null) {
+                      dateFinController.text = date.toIso8601String();
+                    }
+                  },
                 ),
               ],
             ),
@@ -276,7 +308,6 @@ class _MyHomePageState extends State<UserListPage> {
                   description: descriptionController.text,
                   comite: comiteController.text,
                   type: typeController.text,
-                  etat: etatController.text,
                   dateDebut: DateTime.parse(dateDebutController.text),
                   dateFin: DateTime.parse(dateFinController.text),
                 );
@@ -292,6 +323,15 @@ class _MyHomePageState extends State<UserListPage> {
     );
   }
 
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -299,50 +339,73 @@ class _MyHomePageState extends State<UserListPage> {
         title: Text('Demande List'),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: fetchData,
+            icon: Icon(Icons.exit_to_app),
+            onPressed: logout,
           ),
         ],
       ),
-      body: demandeList.isEmpty
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              itemCount: demandeList.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 3,
-                  margin: EdgeInsets.all(8),
-                  child: ListTile(
-                    title: Text(demandeList[index]['titre']),
-                    subtitle: Text(demandeList[index]['description']),
-                    onTap: () {
-                      fetchDetails(demandeList[index]['id']);
-                    },
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            // Call the method to show the edit modal
-                            showEditModal(UserDemandeDetails.fromJson(
-                                demandeList[index]));
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            confirmDelete(demandeList[index]['id']);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: (query) {
+                searchDemandes(query);
               },
+              decoration: InputDecoration(
+                labelText: 'Search',
+                hintText: 'Search for demandes...',
+                prefixIcon: Icon(Icons.search),
+              ),
             ),
+          ),
+          Expanded(
+            child: filteredDemandeList.isEmpty
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : ListView.builder(
+                    itemCount: filteredDemandeList.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        elevation: 3,
+                        margin: EdgeInsets.all(8),
+                        child: ListTile(
+                          title: Text(filteredDemandeList[index]['titre']),
+                          subtitle:
+                              Text(filteredDemandeList[index]['description']),
+                          onTap: () {
+                            fetchDetails(filteredDemandeList[index]['id']);
+                          },
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () {
+                                  showEditModal(
+                                    UserDemandeDetails.fromJson(
+                                      filteredDemandeList[index],
+                                    ),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () {
+                                  confirmDelete(
+                                      filteredDemandeList[index]['id']);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: addDemande,
         child: Icon(Icons.add),
@@ -353,7 +416,7 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> fetchDetails(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.11.1:8060/api/demande/id/$id'),
+        Uri.parse('http://192.168.56.1:8060/api/demande/id/$id'),
       );
 
       if (response.statusCode == 200) {
