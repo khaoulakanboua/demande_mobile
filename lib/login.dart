@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -15,8 +17,8 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  Future<void> loginUser() async {
-    final String url = 'http://192.168.11.1:8060/api/auth/signin';
+   Future<void> loginUser() async {
+    final String url = 'http://192.168.1.3:8060/api/auth/signin';
 
     try {
       final response = await http.post(
@@ -31,18 +33,36 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
 
-        // Assuming the server returns a JWT in the response
         String jwtToken = responseData['accessToken'];
         String username = responseData['username'];
+        int id = responseData['id'];
+        List<dynamic> roles = responseData['roles'];
+
         print('Login success: ${jwtToken}');
+        print('User roles: $roles');
+
         final prefs = await SharedPreferences.getInstance();
         prefs.setString('token', jwtToken);
         prefs.setString('username', username);
+        prefs.setInt('id', id);
+        prefs.setStringList('roles', roles.map((role) => role.toString()).toList());
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => UserListPage()),
-        );
+        // Navigate based on user roles
+        if (roles.contains('ROLE_ADMIN')) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MyHomePage()),
+          );
+        } else if (roles.contains('ROLE_USER')) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => UserListPage()),
+          );
+        } else {
+          // Handle other roles or navigate to a default page
+          print('Unknown user role. Navigating to a default page.');
+          // You can navigate to a default page or display an error message here.
+        }
       } else {
         // Handle login error (e.g., show an error message)
         print('Login failed: ${response.reasonPhrase}');
@@ -96,8 +116,7 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
               onPressed: () => loginUser(),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.blue, // Text color
+                foregroundColor: Colors.white, backgroundColor: Colors.blue, // Text color
               ),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -115,3 +134,5 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+
