@@ -18,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordController = TextEditingController();
 
    Future<void> loginUser() async {
-    final String url = 'http://192.168.168.124:8060/api/auth/signin';
+    final String url = 'http://192.168.1.3:8060/api/auth/signin';
 
     try {
       final response = await http.post(
@@ -35,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
 
         String jwtToken = responseData['accessToken'];
         String username = responseData['username'];
+        int id = responseData['id'];
         List<dynamic> roles = responseData['roles'];
 
         print('Login success: ${jwtToken}');
@@ -43,6 +44,7 @@ class _LoginPageState extends State<LoginPage> {
         final prefs = await SharedPreferences.getInstance();
         prefs.setString('token', jwtToken);
         prefs.setString('username', username);
+        prefs.setInt('id', id);
         prefs.setStringList('roles', roles.map((role) => role.toString()).toList());
 
         // Navigate based on user roles
