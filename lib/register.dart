@@ -16,7 +16,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   TextEditingController passwordController = TextEditingController();
 
   Future<void> registerUser() async {
-    final String url = 'http://172.22.96.1:8060/api/auth/signup';
+    final String url = 'http://192.168.8.195:8060/api/auth/signup';
 
     try {
       final response = await http.post(
