@@ -75,6 +75,8 @@ class UserListPage extends StatefulWidget {
 class _MyHomePageState extends State<UserListPage> {
   List<dynamic> demandeList = [];
   List<dynamic> filteredDemandeList = [];
+    TextEditingController searchController = TextEditingController();
+
 
   @override
   void initState() {
@@ -99,7 +101,7 @@ class _MyHomePageState extends State<UserListPage> {
     final prefs = await SharedPreferences.getInstance();
     String? username = prefs.getString('username');
     final response = await http.get(
-      Uri.parse('http://192.168.56.1:8060/api/demande/findbyuser/$username'),
+      Uri.parse('http://192.168.8.195:8060/api/demande/findbyuser/$username'),
     );
 
     if (response.statusCode == 200) {
@@ -114,7 +116,7 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> deleteDemande(int id) async {
     try {
       final response = await http.delete(
-        Uri.parse('http://192.168.56.1:8060/api/demande/delete/$id'),
+        Uri.parse('http://192.168.8.195:8060/api/demande/delete/$id'),
       );
 
       if (response.statusCode == 200) {
@@ -190,7 +192,7 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> updateDemande(int id, UserDemandeDetails details) async {
     try {
       final response = await http.put(
-        Uri.parse('http://192.168.56.1:8060/api/demande/update/$id'),
+        Uri.parse('http://192.168.8.195:8060/api/demande/update/$id'),
         body: json.encode(details.toJson()),
         headers: {'Content-Type': 'application/json'},
       );
@@ -204,7 +206,7 @@ class _MyHomePageState extends State<UserListPage> {
     }
   }
 
-  void searchDemandes(String query) {
+ void searchDemandes(String query) {
     setState(() {
       filteredDemandeList = demandeList
           .where((demande) =>
@@ -343,9 +345,10 @@ class _MyHomePageState extends State<UserListPage> {
       ),
       body: Column(
         children: [
-          Padding(
+           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
+              controller: searchController,
               onChanged: (query) {
                 searchDemandes(query);
               },
@@ -411,7 +414,7 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> fetchDetails(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.56.1:8060/api/demande/id/$id'),
+        Uri.parse('http://192.168.8.195:8060/api/demande/id/$id'),
       );
 
       if (response.statusCode == 200) {

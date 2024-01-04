@@ -16,7 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordController = TextEditingController();
 
   Future<void> loginUser() async {
-    final String url = 'http://192.168.56.1:8060/api/auth/signin';
+    final String url = 'http://192.168.8.195:8060/api/auth/signin';
 
     try {
       final response = await http.post(
