@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddDemandeWidget extends StatefulWidget {
   final Function onDemandeAdded;
@@ -21,8 +22,10 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
 
   Future<void> addDemande() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      int? userId = prefs.getInt('id');
       final response = await http.post(
-        Uri.parse('http://192.168.137.121:8060/api/demande/save'),
+        Uri.parse('http://192.168.1.3:8060/api/demande/save'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -33,6 +36,10 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
           'type': typeController.text,
           'date_debut': dateDebutController?.toIso8601String(),
           'date_fin': dateFinController?.toIso8601String(),
+          'user': {
+            'id': userId, // Replace userId with the actual user id
+            // Add other user-related fields if needed
+          },
         }),
       );
 
