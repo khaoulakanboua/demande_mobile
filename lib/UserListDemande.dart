@@ -1,35 +1,34 @@
 import 'dart:convert';
 import 'package:demande_mobile/addDemande.dart';
+import 'package:demande_mobile/login.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-void main() {
-  runApp(MyApp());
-}
-
 class UserDemandeDetails {
+  final int id;
   final String titre;
   final String description;
   final String comite;
   final String type;
-  final String etat;
+  final String? etat;
   final DateTime dateDebut;
   final DateTime dateFin;
 
   UserDemandeDetails({
+    required this.id,
     required this.titre,
     required this.description,
     required this.comite,
     required this.type,
-    required this.etat,
+    this.etat,
     required this.dateDebut,
     required this.dateFin,
   });
 
   factory UserDemandeDetails.fromJson(Map<String, dynamic> json) {
     return UserDemandeDetails(
+      id: json['id'] ?? 0,
       titre: json['titre'],
       description: json['description'],
       comite: json['comite'],
@@ -38,6 +37,19 @@ class UserDemandeDetails {
       dateDebut: DateTime.parse(json['date_debut']),
       dateFin: DateTime.parse(json['date_fin']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'titre': titre,
+      'description': description,
+      'comite': comite,
+      'type': type,
+      'etat': etat,
+      'date_debut': dateDebut.toIso8601String(),
+      'date_fin': dateFin.toIso8601String(),
+    };
   }
 }
 
@@ -48,7 +60,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter API Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.indigo)
-            .copyWith(secondary: Colors.orange), // Set your accent color
+            .copyWith(secondary: Colors.orange),
       ),
       home: UserListPage(),
     );
@@ -62,6 +74,7 @@ class UserListPage extends StatefulWidget {
 
 class _MyHomePageState extends State<UserListPage> {
   List<dynamic> demandeList = [];
+  List<dynamic> filteredDemandeList = [];
 
   @override
   void initState() {
@@ -75,8 +88,7 @@ class _MyHomePageState extends State<UserListPage> {
       builder: (BuildContext context) {
         return AddDemandeWidget(
           onDemandeAdded: () {
-            // Called when a new demande is successfully added
-            fetchData(); // Refresh the list
+            fetchData();
           },
         );
       },
@@ -84,10 +96,11 @@ class _MyHomePageState extends State<UserListPage> {
   }
 
   Future<void> fetchData() async {
-  final prefs = await SharedPreferences.getInstance();
-  String? username = prefs.getString('username');
-    final response =
-        await http.get(Uri.parse('http://192.168.8.195:8060/api/demande/findbyuser/${username}'));
+    final prefs = await SharedPreferences.getInstance();
+    String? username = prefs.getString('username');
+    final response = await http.get(
+      Uri.parse('http://192.168.56.1:8060/api/demande/findbyuser/$username'),
+    );
 
     if (response.statusCode == 200) {
       setState(() {
@@ -95,6 +108,22 @@ class _MyHomePageState extends State<UserListPage> {
       });
     } else {
       throw Exception('Failed to load data');
+    }
+  }
+
+  Future<void> deleteDemande(int id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('http://192.168.56.1:8060/api/demande/delete/$id'),
+      );
+
+      if (response.statusCode == 200) {
+        fetchData();
+      } else {
+        throw Exception('Failed to delete demande');
+      }
+    } catch (e) {
+      print('Error deleting demande: $e');
     }
   }
 
@@ -115,7 +144,6 @@ class _MyHomePageState extends State<UserListPage> {
                 Text('Etat: ${details.etat}'),
                 Text('Date de début: ${details.dateDebut}'),
                 Text('Date de fin: ${details.dateFin}'),
-                // Add other details as needed
               ],
             ),
           ),
@@ -132,6 +160,175 @@ class _MyHomePageState extends State<UserListPage> {
     );
   }
 
+  Future<void> confirmDelete(int id) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmation'),
+          content: Text('Are you sure you want to delete this demande?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                deleteDemande(id);
+                Navigator.of(context).pop();
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> updateDemande(int id, UserDemandeDetails details) async {
+    try {
+      final response = await http.put(
+        Uri.parse('http://192.168.56.1:8060/api/demande/update/$id'),
+        body: json.encode(details.toJson()),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        fetchData();
+      } else {
+        throw Exception('Failed to update demande');
+      }
+    } catch (e) {
+      print('Error updating demande: $e');
+    }
+  }
+
+  void searchDemandes(String query) {
+    setState(() {
+      filteredDemandeList = demandeList
+          .where((demande) =>
+              demande['titre'].toLowerCase().contains(query.toLowerCase()) ||
+              demande['description']
+                  .toLowerCase()
+                  .contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
+  Future<void> showEditModal(UserDemandeDetails details) async {
+    TextEditingController titreController =
+        TextEditingController(text: details.titre);
+    TextEditingController descriptionController =
+        TextEditingController(text: details.description);
+    TextEditingController comiteController =
+        TextEditingController(text: details.comite);
+    TextEditingController typeController =
+        TextEditingController(text: details.type);
+    TextEditingController dateDebutController =
+        TextEditingController(text: details.dateDebut.toIso8601String());
+    TextEditingController dateFinController =
+        TextEditingController(text: details.dateFin.toIso8601String());
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit Demande'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: titreController,
+                  decoration: InputDecoration(labelText: 'Titre'),
+                ),
+                TextField(
+                  controller: descriptionController,
+                  decoration: InputDecoration(labelText: 'Description'),
+                ),
+                TextField(
+                  controller: comiteController,
+                  decoration: InputDecoration(labelText: 'Comite'),
+                ),
+                TextField(
+                  controller: typeController,
+                  decoration: InputDecoration(labelText: 'Type'),
+                ),
+                TextField(
+                  controller: dateDebutController,
+                  decoration: InputDecoration(labelText: 'Date de début'),
+                  onTap: () async {
+                    DateTime? date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (date != null) {
+                      dateDebutController.text = date.toIso8601String();
+                    }
+                  },
+                ),
+                TextField(
+                  controller: dateFinController,
+                  decoration: InputDecoration(labelText: 'Date de fin'),
+                  onTap: () async {
+                    DateTime? date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (date != null) {
+                      dateFinController.text = date.toIso8601String();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                UserDemandeDetails updatedDetails = UserDemandeDetails(
+                  id: details.id,
+                  titre: titreController.text,
+                  description: descriptionController.text,
+                  comite: comiteController.text,
+                  type: typeController.text,
+                  dateDebut: DateTime.parse(dateDebutController.text),
+                  dateFin: DateTime.parse(dateFinController.text),
+                );
+
+                updateDemande(details.id, updatedDetails);
+                Navigator.of(context).pop();
+              },
+              child: Text('Update'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> logout() async {
+    // Clear shared preferences
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+
+    // Navigate back to the login page
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,31 +336,71 @@ class _MyHomePageState extends State<UserListPage> {
         title: Text('Demande List'),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: fetchData,
+            icon: Icon(Icons.exit_to_app),
+            onPressed: logout,
           ),
         ],
       ),
-      body: demandeList.isEmpty
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              itemCount: demandeList.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 3,
-                  margin: EdgeInsets.all(8),
-                  child: ListTile(
-                    title: Text(demandeList[index]['titre']),
-                    subtitle: Text(demandeList[index]['description']),
-                    onTap: () {
-                      fetchDetails(demandeList[index]['id']);
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: (query) {
+                searchDemandes(query);
+              },
+              decoration: InputDecoration(
+                labelText: 'Search',
+                hintText: 'Search for demandes...',
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
+          Expanded(
+            child: demandeList.isEmpty
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : ListView.builder(
+                    itemCount: demandeList.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        elevation: 3,
+                        margin: EdgeInsets.all(8),
+                        child: ListTile(
+                          title: Text(demandeList[index]['titre']),
+                          subtitle: Text(demandeList[index]['description']),
+                          onTap: () {
+                            fetchDetails(demandeList[index]['id']);
+                          },
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () {
+                                  showEditModal(
+                                    UserDemandeDetails.fromJson(
+                                      demandeList[index],
+                                    ),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () {
+                                  confirmDelete(demandeList[index]['id']);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     },
                   ),
-                );
-              },
-            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: addDemande,
         child: Icon(Icons.add),
@@ -174,7 +411,7 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> fetchDetails(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.8.195:8060/api/demande/id/$id'),
+        Uri.parse('http://192.168.56.1:8060/api/demande/id/$id'),
       );
 
       if (response.statusCode == 200) {
