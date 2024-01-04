@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -17,8 +15,8 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-   Future<void> loginUser() async {
-    final String url = 'http://192.168.1.3:8060/api/auth/signin';
+  Future<void> loginUser() async {
+    final String url = 'http://192.168.1.11:8060/api/auth/signin';
 
     try {
       final response = await http.post(
@@ -45,7 +43,8 @@ class _LoginPageState extends State<LoginPage> {
         prefs.setString('token', jwtToken);
         prefs.setString('username', username);
         prefs.setInt('id', id);
-        prefs.setStringList('roles', roles.map((role) => role.toString()).toList());
+        prefs.setStringList(
+            'roles', roles.map((role) => role.toString()).toList());
 
         // Navigate based on user roles
         if (roles.contains('ROLE_ADMIN')) {
@@ -116,7 +115,8 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
               onPressed: () => loginUser(),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Colors.blue, // Text color
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue, // Text color
               ),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -134,5 +134,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
-
