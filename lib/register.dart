@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:demande_mobile/login.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -33,8 +34,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
       );
 
       if (response.statusCode == 200) {
-        // Registration successful, you can handle the response as needed
+        // Registration successful, navigate to the login page
         print('Registration successful');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
       } else {
         // Handle registration error (e.g., show an error message)
         print('Registration failed: ${response.reasonPhrase}');

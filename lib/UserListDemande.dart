@@ -105,6 +105,7 @@ class _MyHomePageState extends State<UserListPage> {
     if (response.statusCode == 200) {
       setState(() {
         demandeList = json.decode(response.body);
+        filteredDemandeList = List.from(demandeList);
       });
     } else {
       throw Exception('Failed to load data');
@@ -205,14 +206,24 @@ class _MyHomePageState extends State<UserListPage> {
   }
 
   void searchDemandes(String query) {
+    print("Search Query: $query");
+
     setState(() {
-      filteredDemandeList = demandeList
-          .where((demande) =>
-              demande['titre'].toLowerCase().contains(query.toLowerCase()) ||
-              demande['description']
-                  .toLowerCase()
-                  .contains(query.toLowerCase()))
-          .toList();
+      if (query.isEmpty) {
+        // If the search query is empty, show all demandes
+        filteredDemandeList = List.from(demandeList);
+      } else {
+        // Filter demandes based on the search query (case-insensitive)
+        filteredDemandeList = demandeList
+            .where((demande) =>
+                demande['titre'].toLowerCase().contains(query.toLowerCase()) ||
+                demande['description']
+                    .toLowerCase()
+                    .contains(query.toLowerCase()))
+            .toList();
+
+        print("Filtered Demande List: $filteredDemandeList");
+      }
     });
   }
 
