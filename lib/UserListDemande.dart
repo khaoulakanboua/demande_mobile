@@ -206,19 +206,13 @@ class _MyHomePageState extends State<UserListPage> {
 
   void searchDemandes(String query) {
     setState(() {
-      if (query.isEmpty) {
-        // If the search query is empty, display all items
-        filteredDemandeList = List.from(demandeList);
-      } else {
-        // Otherwise, filter based on the search query
-        filteredDemandeList = demandeList
-            .where((demande) =>
-                demande['titre'].toLowerCase().contains(query.toLowerCase()) ||
-                demande['description']
-                    .toLowerCase()
-                    .contains(query.toLowerCase()))
-            .toList();
-      }
+      filteredDemandeList = demandeList
+          .where((demande) =>
+              demande['titre'].toLowerCase().contains(query.toLowerCase()) ||
+              demande['description']
+                  .toLowerCase()
+                  .contains(query.toLowerCase()))
+          .toList();
     });
   }
 
@@ -324,8 +318,11 @@ class _MyHomePageState extends State<UserListPage> {
   }
 
   Future<void> logout() async {
+    // Clear shared preferences
     final prefs = await SharedPreferences.getInstance();
     prefs.clear();
+
+    // Navigate back to the login page
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => LoginPage()),
@@ -360,22 +357,21 @@ class _MyHomePageState extends State<UserListPage> {
             ),
           ),
           Expanded(
-            child: filteredDemandeList.isEmpty
+            child: demandeList.isEmpty
                 ? Center(
                     child: CircularProgressIndicator(),
                   )
                 : ListView.builder(
-                    itemCount: filteredDemandeList.length,
+                    itemCount: demandeList.length,
                     itemBuilder: (context, index) {
                       return Card(
                         elevation: 3,
                         margin: EdgeInsets.all(8),
                         child: ListTile(
-                          title: Text(filteredDemandeList[index]['titre']),
-                          subtitle:
-                              Text(filteredDemandeList[index]['description']),
+                          title: Text(demandeList[index]['titre']),
+                          subtitle: Text(demandeList[index]['description']),
                           onTap: () {
-                            fetchDetails(filteredDemandeList[index]['id']);
+                            fetchDetails(demandeList[index]['id']);
                           },
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -385,7 +381,7 @@ class _MyHomePageState extends State<UserListPage> {
                                 onPressed: () {
                                   showEditModal(
                                     UserDemandeDetails.fromJson(
-                                      filteredDemandeList[index],
+                                      demandeList[index],
                                     ),
                                   );
                                 },
@@ -393,8 +389,7 @@ class _MyHomePageState extends State<UserListPage> {
                               IconButton(
                                 icon: Icon(Icons.delete),
                                 onPressed: () {
-                                  confirmDelete(
-                                      filteredDemandeList[index]['id']);
+                                  confirmDelete(demandeList[index]['id']);
                                 },
                               ),
                             ],
