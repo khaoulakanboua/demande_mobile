@@ -84,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> fetchData() async {
     final response =
 
-        await http.get(Uri.parse('http://192.168.8.195:8060/api/demande/all'));
+        await http.get(Uri.parse('http://192.168.137.121:8060/api/demande/all'));
 
 
     if (response.statusCode == 200) {
@@ -216,7 +216,7 @@ Widget build(BuildContext context) {
 Future<void> acceptDemande(int id) async {
   try {
     final response = await http.put(
-      Uri.parse('http://192.168.8.195:8060/api/demande/accept/$id'),
+      Uri.parse('http://192.168.137.121:8060/api/demande/accept/$id'),
     );
 
     if (response.statusCode == 200) {
@@ -233,7 +233,7 @@ Future<void> acceptDemande(int id) async {
 Future<void> rejectDemande(int id) async {
   try {
     final response = await http.put(
-      Uri.parse('http://192.168.8.195:8060/api/demande/reject/$id'),
+      Uri.parse('http://192.168.137.121:8060/api/demande/reject/$id'),
     );
 
     if (response.statusCode == 200) {
@@ -251,7 +251,7 @@ Future<void> rejectDemande(int id) async {
   Future<void> fetchDetails(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.8.195:8060/api/demande/id/$id'),
+        Uri.parse('http://192.168.137.121:8060/api/demande/id/$id'),
       );
 
       if (response.statusCode == 200) {
