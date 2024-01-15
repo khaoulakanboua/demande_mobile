@@ -133,18 +133,32 @@ class _MyHomePageState extends State<UserListPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Details de la Demande'),
+          title: Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.blue),
+              SizedBox(width: 10),
+              Text('Détails de la Demande',
+                  style: TextStyle(color: Colors.blue)),
+            ],
+          ),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Titre: ${details.titre}'),
-                Text('Description: ${details.description}'),
-                Text('Comite: ${details.comite}'),
-                Text('Type: ${details.type}'),
-                Text('Etat: ${details.etat}'),
-                Text('Date de début: ${details.dateDebut}'),
-                Text('Date de fin: ${details.dateFin}'),
+                _buildDetailRow(
+                    'Titre', details.titre, Icons.title, Colors.blue),
+                _buildDetailRow('Description', details.description,
+                    Icons.description, Colors.blue),
+                _buildDetailRow(
+                    'Comite', details.comite, Icons.people, Colors.blue),
+                _buildDetailRow(
+                    'Type', details.type, Icons.category, Colors.blue),
+                _buildDetailRow('Etat', details.etat ?? 'N/A',
+                    Icons.check_circle, _getStatusColor(details.etat)),
+                _buildDetailRow('Date de début', _formatDate(details.dateDebut),
+                    Icons.date_range, Colors.blue),
+                _buildDetailRow('Date de fin', _formatDate(details.dateFin),
+                    Icons.date_range, Colors.blue),
               ],
             ),
           ),
@@ -153,7 +167,7 @@ class _MyHomePageState extends State<UserListPage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Fermer'),
+              child: const Text('Fermer', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -161,26 +175,73 @@ class _MyHomePageState extends State<UserListPage> {
     );
   }
 
+  Widget _buildDetailRow(
+      String label, String value, IconData icon, Color textColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: textColor),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style:
+                      TextStyle(fontWeight: FontWeight.bold, color: textColor),
+                ),
+                Text(value, style: TextStyle(color: textColor)),
+                Divider(
+                    color:
+                        textColor), // Add a line separator for better visibility
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'accepted':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      case 'inprogress':
+        return Colors.orange;
+      default:
+        return Colors.black; // Change to a default color if needed
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
   Future<void> confirmDelete(int id) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirmation'),
-          content: Text('Are you sure you want to delete this demande?'),
+          title: const Text('Confirmation'),
+          content: const Text('Are you sure you want to delete this demande?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 deleteDemande(id);
                 Navigator.of(context).pop();
               },
-              child: Text('Delete'),
+              child: const Text('Delete'),
             ),
           ],
         );
@@ -210,10 +271,8 @@ class _MyHomePageState extends State<UserListPage> {
 
     setState(() {
       if (query.isEmpty) {
-        // If the search query is empty, show all demandes
         filteredDemandeList = List.from(demandeList);
       } else {
-        // Filter demandes based on the search query (case-insensitive)
         filteredDemandeList = demandeList
             .where((demande) =>
                 demande['titre'].toLowerCase().contains(query.toLowerCase()) ||
@@ -245,55 +304,67 @@ class _MyHomePageState extends State<UserListPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Edit Demande'),
+          title: const Text('Edit Demande',
+              style: TextStyle(color: Colors.indigo)),
           content: SingleChildScrollView(
             child: Column(
               children: [
                 TextField(
                   controller: titreController,
-                  decoration: InputDecoration(labelText: 'Titre'),
+                  decoration: const InputDecoration(
+                    labelText: 'Titre',
+                    icon: Icon(Icons.title, color: Colors.indigo),
+                  ),
                 ),
+                const SizedBox(height: 10),
                 TextField(
                   controller: descriptionController,
-                  decoration: InputDecoration(labelText: 'Description'),
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    icon: Icon(Icons.description, color: Colors.indigo),
+                  ),
                 ),
+                const SizedBox(height: 10),
                 TextField(
                   controller: comiteController,
-                  decoration: InputDecoration(labelText: 'Comite'),
+                  decoration: const InputDecoration(
+                    labelText: 'Comite',
+                    icon: Icon(Icons.people, color: Colors.indigo),
+                  ),
                 ),
+                const SizedBox(height: 10),
                 TextField(
                   controller: typeController,
-                  decoration: InputDecoration(labelText: 'Type'),
+                  decoration: const InputDecoration(
+                    labelText: 'Type',
+                    icon: Icon(Icons.category, color: Colors.indigo),
+                  ),
                 ),
-                TextField(
-                  controller: dateDebutController,
-                  decoration: InputDecoration(labelText: 'Date de début'),
-                  onTap: () async {
-                    DateTime? date = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2101),
-                    );
-                    if (date != null) {
-                      dateDebutController.text = date.toIso8601String();
-                    }
-                  },
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () => _selectDateDebut(context, dateDebutController),
+                  child: AbsorbPointer(
+                    child: TextFormField(
+                      controller: dateDebutController,
+                      decoration: const InputDecoration(
+                        labelText: 'Date de début',
+                        icon: Icon(Icons.date_range, color: Colors.indigo),
+                      ),
+                    ),
+                  ),
                 ),
-                TextField(
-                  controller: dateFinController,
-                  decoration: InputDecoration(labelText: 'Date de fin'),
-                  onTap: () async {
-                    DateTime? date = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2101),
-                    );
-                    if (date != null) {
-                      dateFinController.text = date.toIso8601String();
-                    }
-                  },
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () => _selectDateFin(context, dateFinController),
+                  child: AbsorbPointer(
+                    child: TextFormField(
+                      controller: dateFinController,
+                      decoration: const InputDecoration(
+                        labelText: 'Date de fin',
+                        icon: Icon(Icons.date_range, color: Colors.indigo),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -303,9 +374,9 @@ class _MyHomePageState extends State<UserListPage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel', style: TextStyle(color: Colors.red)),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () {
                 UserDemandeDetails updatedDetails = UserDemandeDetails(
                   id: details.id,
@@ -320,7 +391,9 @@ class _MyHomePageState extends State<UserListPage> {
                 updateDemande(details.id, updatedDetails);
                 Navigator.of(context).pop();
               },
-              child: Text('Update'),
+              style: ElevatedButton.styleFrom(primary: Colors.green),
+              child:
+                  const Text('Update', style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -328,26 +401,67 @@ class _MyHomePageState extends State<UserListPage> {
     );
   }
 
+  Future<void> _selectDateDebut(
+      BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null && picked != DateTime.parse(controller.text)) {
+      controller.text = picked.toIso8601String();
+    }
+  }
+
+  Future<void> _selectDateFin(
+      BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null && picked != DateTime.parse(controller.text)) {
+      controller.text = picked.toIso8601String();
+    }
+  }
+
   Future<void> logout() async {
-    // Clear shared preferences
     final prefs = await SharedPreferences.getInstance();
     prefs.clear();
 
-    // Navigate back to the login page
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => LoginPage()),
     );
   }
 
+  Widget getStatusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'accepted':
+        return const Icon(Icons.verified, color: Colors.green);
+      case 'rejected':
+        return const Icon(Icons.clear, color: Colors.red);
+      case 'inprogress':
+        return const Icon(Icons.timer, color: Colors.orange);
+      default:
+        return const Icon(Icons.help);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Demande List'),
+        title: const Text('Demande List'),
+        backgroundColor: const Color(0xFF54408C),
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: Icon(Icons.exit_to_app),
+            icon: const Icon(Icons.exit_to_app),
             onPressed: logout,
           ),
         ],
@@ -360,7 +474,7 @@ class _MyHomePageState extends State<UserListPage> {
               onChanged: (query) {
                 searchDemandes(query);
               },
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Search',
                 hintText: 'Search for demandes...',
                 prefixIcon: Icon(Icons.search),
@@ -369,7 +483,7 @@ class _MyHomePageState extends State<UserListPage> {
           ),
           Expanded(
             child: demandeList.isEmpty
-                ? Center(
+                ? const Center(
                     child: CircularProgressIndicator(),
                   )
                 : ListView.builder(
@@ -382,11 +496,48 @@ class _MyHomePageState extends State<UserListPage> {
                           : filteredDemandeList[index];
 
                       return Card(
-                        elevation: 3,
-                        margin: EdgeInsets.all(8),
+                        elevation: 5,
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: ListTile(
-                          title: Text(displayedDemande['titre']),
-                          subtitle: Text(displayedDemande['description']),
+                          title: Text(
+                            displayedDemande['titre'],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(displayedDemande['description']),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Comite: ${displayedDemande['comite']}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              Text(
+                                'Type: ${displayedDemande['type']}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Etat: ${displayedDemande['etat'] ?? 'N/A'}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  getStatusIcon(displayedDemande['etat'] ?? ''),
+                                ],
+                              ),
+                            ],
+                          ),
                           onTap: () {
                             fetchDetails(displayedDemande['id']);
                           },
@@ -394,7 +545,8 @@ class _MyHomePageState extends State<UserListPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: Icon(Icons.edit),
+                                icon: const Icon(Icons.edit),
+                                color: Colors.green,
                                 onPressed: () {
                                   showEditModal(
                                     UserDemandeDetails.fromJson(
@@ -403,7 +555,8 @@ class _MyHomePageState extends State<UserListPage> {
                                 },
                               ),
                               IconButton(
-                                icon: Icon(Icons.delete),
+                                icon: const Icon(Icons.delete),
+                                color: Colors.red,
                                 onPressed: () {
                                   confirmDelete(displayedDemande['id']);
                                 },
@@ -419,7 +572,8 @@ class _MyHomePageState extends State<UserListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: addDemande,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
+        backgroundColor: Colors.blueAccent,
       ),
     );
   }

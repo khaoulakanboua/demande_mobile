@@ -37,15 +37,12 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
           'date_debut': dateDebutController?.toIso8601String(),
           'date_fin': dateFinController?.toIso8601String(),
           'user': {
-            'id': userId, // Replace userId with the actual user id
-            // Add other user-related fields if needed
+            'id': userId,
           },
         }),
       );
 
       if (response.statusCode == 200) {
-        // Successfully added the demande
-        // Notify the parent widget about the ajout
         widget.onDemandeAdded();
       } else {
         print('Failed to add demande. Status code: ${response.statusCode}');
@@ -90,26 +87,43 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Ajouter une demande'),
+      title: const Text('Ajouter une demande',
+          style: TextStyle(color: Colors.indigo)),
       content: SingleChildScrollView(
         child: Column(
           children: [
             TextFormField(
               controller: titreController,
-              decoration: InputDecoration(labelText: 'Titre'),
+              decoration: const InputDecoration(
+                labelText: 'Titre',
+                icon: Icon(Icons.title, color: Colors.indigo),
+              ),
             ),
+            const SizedBox(height: 10),
             TextFormField(
               controller: descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                icon: Icon(Icons.description, color: Colors.indigo),
+              ),
             ),
+            const SizedBox(height: 10),
             TextFormField(
               controller: comiteController,
-              decoration: InputDecoration(labelText: 'Comite'),
+              decoration: const InputDecoration(
+                labelText: 'Comite',
+                icon: Icon(Icons.people, color: Colors.indigo),
+              ),
             ),
+            const SizedBox(height: 10),
             TextFormField(
               controller: typeController,
-              decoration: InputDecoration(labelText: 'Type'),
+              decoration: const InputDecoration(
+                labelText: 'Type',
+                icon: Icon(Icons.category, color: Colors.indigo),
+              ),
             ),
+            const SizedBox(height: 10),
             GestureDetector(
               onTap: () => _selectDateDebut(context),
               child: AbsorbPointer(
@@ -121,10 +135,14 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
                             .split(' ')[0] ??
                         '',
                   ),
-                  decoration: InputDecoration(labelText: 'Date de début'),
+                  decoration: const InputDecoration(
+                    labelText: 'Date de début',
+                    icon: Icon(Icons.date_range, color: Colors.indigo),
+                  ),
                 ),
               ),
             ),
+            const SizedBox(height: 10),
             GestureDetector(
               onTap: () => _selectDateFin(context),
               child: AbsorbPointer(
@@ -134,7 +152,10 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
                         dateFinController?.toLocal().toString().split(' ')[0] ??
                             '',
                   ),
-                  decoration: InputDecoration(labelText: 'Date de fin'),
+                  decoration: const InputDecoration(
+                    labelText: 'Date de fin',
+                    icon: Icon(Icons.date_range, color: Colors.indigo),
+                  ),
                 ),
               ),
             ),
@@ -146,14 +167,15 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Annuler'),
+          child: const Text('Annuler', style: TextStyle(color: Colors.red)),
         ),
-        TextButton(
+        ElevatedButton(
           onPressed: () async {
             await addDemande();
-            Navigator.of(context).pop(); // Close the dialog
+            Navigator.of(context).pop();
           },
-          child: Text('Ajouter'),
+          style: ElevatedButton.styleFrom(primary: Colors.green),
+          child: const Text('Ajouter', style: TextStyle(color: Colors.white)),
         ),
       ],
     );

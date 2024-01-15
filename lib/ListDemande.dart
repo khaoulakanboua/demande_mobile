@@ -115,18 +115,32 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Details de la Demande'),
+          title: Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.blue),
+              SizedBox(width: 10),
+              Text('Détails de la Demande',
+                  style: TextStyle(color: Colors.blue)),
+            ],
+          ),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Titre: ${details.titre}'),
-                Text('Description: ${details.description}'),
-                Text('Comite: ${details.comite}'),
-                Text('Type: ${details.type}'),
-                Text('Etat: ${details.etat}'),
-                Text('Date de début: ${details.dateDebut}'),
-                Text('Date de fin: ${details.dateFin}'),
+                _buildDetailRow(
+                    'Titre', details.titre, Icons.title, Colors.blue),
+                _buildDetailRow('Description', details.description,
+                    Icons.description, Colors.blue),
+                _buildDetailRow(
+                    'Comite', details.comite, Icons.people, Colors.blue),
+                _buildDetailRow(
+                    'Type', details.type, Icons.category, Colors.blue),
+                _buildDetailRow('Etat', details.etat ?? 'N/A',
+                    Icons.check_circle, _getStatusColor(details.etat)),
+                _buildDetailRow('Date de début', _formatDate(details.dateDebut),
+                    Icons.date_range, Colors.blue),
+                _buildDetailRow('Date de fin', _formatDate(details.dateFin),
+                    Icons.date_range, Colors.blue),
               ],
             ),
           ),
@@ -135,7 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Fermer'),
+              child: const Text('Fermer', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -143,14 +157,63 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Widget _buildDetailRow(
+      String label, String value, IconData icon, Color textColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: textColor),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style:
+                      TextStyle(fontWeight: FontWeight.bold, color: textColor),
+                ),
+                Text(value, style: TextStyle(color: textColor)),
+                Divider(
+                    color:
+                        textColor), // Add a line separator for better visibility
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'accepted':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      case 'inprogress':
+        return Colors.orange;
+      default:
+        return Colors.black; // Change to a default color if needed
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Demande List'),
+        title: const Text('Demande List'),
+        backgroundColor: const Color(0xFF54408C),
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: Icon(Icons.exit_to_app),
+            icon: const Icon(Icons.exit_to_app),
             onPressed: logout,
           ),
         ],
@@ -164,7 +227,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onChanged: (query) {
                 searchDemandes(query);
               },
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Search',
                 hintText: 'Search for demandes...',
                 prefixIcon: Icon(Icons.search),
@@ -173,7 +236,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Expanded(
             child: demandeList.isEmpty
-                ? Center(
+                ? const Center(
                     child: CircularProgressIndicator(),
                   )
                 : ListView.builder(
@@ -187,7 +250,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
                       return Card(
                         elevation: 3,
-                        margin: EdgeInsets.all(8),
+                        margin: const EdgeInsets.all(8),
                         child: ListTile(
                           title: Text(filteredDemandeList[index]['titre']),
                           subtitle: Text(
@@ -218,9 +281,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                           Colors.white,
                                         ),
                                       ),
-                                      child: Text('Accepter'),
+                                      child: const Text('Accepter'),
                                     ),
-                                    SizedBox(width: 8),
+                                    const SizedBox(width: 8),
                                     ElevatedButton(
                                       onPressed: () {
                                         rejectDemande(
@@ -236,7 +299,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                           Colors.white,
                                         ),
                                       ),
-                                      child: Text('Rejeter'),
+                                      child: const Text('Rejeter'),
                                     ),
                                   ],
                                 ),
@@ -272,7 +335,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> rejectDemande(int id) async {
     try {
       final response = await http.put(
-        Uri.parse('http:/192.168.56.1:8060/api/demande/reject/$id'),
+        Uri.parse('http://192.168.56.1:8060/api/demande/reject/$id'),
       );
 
       if (response.statusCode == 200) {
