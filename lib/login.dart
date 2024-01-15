@@ -1,10 +1,10 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:demande_mobile/ListDemande.dart';
 import 'package:demande_mobile/UserListDemande.dart';
 import 'package:demande_mobile/register.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -15,8 +15,10 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  bool isPasswordVisible = false;
+
   Future<void> loginUser() async {
-    final String url = 'http://192.168.56.1:8060/api/auth/signin';
+    final String url = 'http://192.168.8.195:8060/api/auth/signin';
 
     try {
       final response = await http.post(
@@ -91,40 +93,74 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              SizedBox(height: 20),
               Text(
-                'Login',
+                'Welcome Back to School Event!',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 20),  // Ajout d'un espace de 20 pixels
+              Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Image.asset(
+                  'assets/graduated.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+              SizedBox(height: 20),  // Ajout d'un espace de 20 pixels
               TextField(
                 controller: usernameController,
                 decoration: InputDecoration(
-                  labelText: 'Username',
-                  border: OutlineInputBorder(),
+                  hintText: 'Enter your username',
+                  prefixIcon: Icon(Icons.person),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 10),  // Ajout d'un espace de 10 pixels
               TextField(
                 controller: passwordController,
-                obscureText: true,
+                obscureText: !isPasswordVisible,
                 decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
+                  hintText: 'Enter your password',
+                  prefixIcon: Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        isPasswordVisible = !isPasswordVisible;
+                      });
+                    },
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 20),  // Ajout d'un espace de 20 pixels
               ElevatedButton(
                 onPressed: () => loginUser(),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
-                  backgroundColor: Colors.blue, // Text color
+                  backgroundColor: const Color(0xFF54408C),
+                  minimumSize: Size(double.infinity, 50),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text('Login', style: TextStyle(fontSize: 16)),
-                ),
+                child: Text('Login', style: TextStyle(fontSize: 16)),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 10),  // Ajout d'un espace de 10 pixels
               TextButton(
                 onPressed: () => navigateToRegistration(),
                 child: Text('Don\'t have an account? Register here'),
