@@ -19,7 +19,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   bool isPasswordVisible = false;
 
   Future<void> registerUser() async {
-    final String url = 'http://192.168.8.195:8060/api/auth/signup';
+    final String url = 'http://192.168.11.1:8060/api/auth/signup';
 
     try {
       final response = await http.post(
@@ -63,7 +63,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registration Page'),
-        backgroundColor: Colors.blueAccent,
       ),
       body: SingleChildScrollView(
         child: Padding(

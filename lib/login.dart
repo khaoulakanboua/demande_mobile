@@ -18,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   bool isPasswordVisible = false;
 
   Future<void> loginUser() async {
-    final String url = 'http://192.168.8.195:8060/api/auth/signin';
+    final String url = 'http://192.168.11.1:8060/api/auth/signin';
 
     try {
       final response = await http.post(
@@ -98,10 +98,10 @@ class _LoginPageState extends State<LoginPage> {
                 'Welcome Back to School Event!',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 20),  // Ajout d'un espace de 20 pixels
+              SizedBox(height: 30),
               Container(
-                width: 150,
-                height: 150,
+                width: 100,
+                height: 100,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   boxShadow: [
@@ -117,50 +117,61 @@ class _LoginPageState extends State<LoginPage> {
                   fit: BoxFit.cover,
                 ),
               ),
-              SizedBox(height: 20),  // Ajout d'un espace de 20 pixels
-              TextField(
-                controller: usernameController,
-                decoration: InputDecoration(
-                  hintText: 'Enter your username',
-                  prefixIcon: Icon(Icons.person),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue),
-                  ),
-                ),
-              ),
-              SizedBox(height: 10),  // Ajout d'un espace de 10 pixels
-              TextField(
-                controller: passwordController,
-                obscureText: !isPasswordVisible,
-                decoration: InputDecoration(
-                  hintText: 'Enter your password',
-                  prefixIcon: Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              SizedBox(height: 30),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: TextField(
+                  controller: usernameController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your username',
+                    prefixIcon: Icon(Icons.person),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        isPasswordVisible = !isPasswordVisible;
-                      });
-                    },
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue),
                   ),
                 ),
               ),
-              SizedBox(height: 20),  // Ajout d'un espace de 20 pixels
-              ElevatedButton(
-                onPressed: () => loginUser(),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: const Color(0xFF54408C),
-                  minimumSize: Size(double.infinity, 50),
+              SizedBox(height: 10),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: TextField(
+                  controller: passwordController,
+                  obscureText: !isPasswordVisible,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your password',
+                    prefixIcon: Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isPasswordVisible = !isPasswordVisible;
+                        });
+                      },
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue),
+                    ),
+                  ),
                 ),
-                child: Text('Login', style: TextStyle(fontSize: 16)),
               ),
-              SizedBox(height: 10),  // Ajout d'un espace de 10 pixels
+              SizedBox(height: 20),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.5,
+                child: ElevatedButton(
+                  onPressed: () => loginUser(),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFF54408C),
+                    minimumSize: Size(double.infinity, 50),
+                  ),
+                  child: Text('Login', style: TextStyle(fontSize: 16)),
+                ),
+              ),
+              SizedBox(height: 10),
               TextButton(
                 onPressed: () => navigateToRegistration(),
                 child: Text('Don\'t have an account? Register here'),

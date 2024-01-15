@@ -100,12 +100,16 @@ class _MyHomePageState extends State<UserListPage> {
     final prefs = await SharedPreferences.getInstance();
     String? username = prefs.getString('username');
     final response = await http.get(
-      Uri.parse('http://172.20.10.4:8060/api/demande/findbyuser/$username'),
+      Uri.parse('http://192.168.11.1:8060/api/demande/findbyuser/$username'),
     );
 
     if (response.statusCode == 200) {
       setState(() {
-        demandeList = json.decode(response.body);
+        demandeList = (json.decode(response.body) as List)
+            .map((item) => item as Map<String, dynamic>)
+            .toList();
+        print("Demande List: $demandeList");
+        filteredDemandeList = List.from(demandeList);
       });
     } else {
       throw Exception('Failed to load data');
@@ -115,7 +119,7 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> deleteDemande(int id) async {
     try {
       final response = await http.delete(
-        Uri.parse('http://172.20.10.4:8060/api/demande/delete/$id'),
+        Uri.parse('http://192.168.11.1:8060/api/demande/delete/$id'),
       );
 
       if (response.statusCode == 200) {
@@ -214,12 +218,16 @@ class _MyHomePageState extends State<UserListPage> {
       case 'inprogress':
         return Colors.orange;
       default:
-        return Colors.black; // Change to a default color if needed
+        return Colors.black;
     }
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+    return '${date.year}-${_twoDigits(date.month)}-${_twoDigits(date.day)}';
+  }
+
+  String _twoDigits(int n) {
+    return n.toString().padLeft(2, '0');
   }
 
   Future<void> confirmDelete(int id) async {
@@ -252,7 +260,7 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> updateDemande(int id, UserDemandeDetails details) async {
     try {
       final response = await http.put(
-        Uri.parse('http://1172.20.10.4:8060/api/demande/update/$id'),
+        Uri.parse('http://192.168.11.1:8060/api/demande/update/$id'),
         body: json.encode(details.toJson()),
         headers: {'Content-Type': 'application/json'},
       );
@@ -267,6 +275,7 @@ class _MyHomePageState extends State<UserListPage> {
   }
 
   void searchDemandes(String query) {
+    print("Original Demande List: $demandeList");
     setState(() {
       if (query.isEmpty) {
         filteredDemandeList = List.from(demandeList);
@@ -278,8 +287,13 @@ class _MyHomePageState extends State<UserListPage> {
                     .toLowerCase()
                     .contains(query.toLowerCase()))
             .toList();
+      }
 
-        print("Filtered Demande List: $filteredDemandeList");
+      print("Filtered Demande List: $filteredDemandeList");
+
+      if (filteredDemandeList.isEmpty) {
+        filteredDemandeList = [];
+        print("List is cleared");
       }
     });
   }
@@ -294,9 +308,9 @@ class _MyHomePageState extends State<UserListPage> {
     TextEditingController typeController =
         TextEditingController(text: details.type);
     TextEditingController dateDebutController =
-        TextEditingController(text: details.dateDebut.toIso8601String());
+        TextEditingController(text: _formatDate(details.dateDebut));
     TextEditingController dateFinController =
-        TextEditingController(text: details.dateFin.toIso8601String());
+        TextEditingController(text: _formatDate(details.dateFin));
 
     return showDialog<void>(
       context: context,
@@ -408,8 +422,11 @@ class _MyHomePageState extends State<UserListPage> {
       lastDate: DateTime(2101),
     );
 
-    if (picked != null && picked != DateTime.parse(controller.text)) {
-      controller.text = picked.toIso8601String();
+    if (picked != null) {
+      final formattedDate = _formatDate(picked);
+      setState(() {
+        controller.text = formattedDate;
+      });
     }
   }
 
@@ -422,8 +439,11 @@ class _MyHomePageState extends State<UserListPage> {
       lastDate: DateTime(2101),
     );
 
-    if (picked != null && picked != DateTime.parse(controller.text)) {
-      controller.text = picked.toIso8601String();
+    if (picked != null) {
+      final formattedDate = _formatDate(picked);
+      setState(() {
+        controller.text = formattedDate;
+      });
     }
   }
 
@@ -486,13 +506,9 @@ class _MyHomePageState extends State<UserListPage> {
                     child: CircularProgressIndicator(),
                   )
                 : ListView.builder(
-                    itemCount: filteredDemandeList.isEmpty
-                        ? demandeList.length
-                        : filteredDemandeList.length,
+                    itemCount: filteredDemandeList.length,
                     itemBuilder: (context, index) {
-                      final displayedDemande = filteredDemandeList.isEmpty
-                          ? demandeList[index]
-                          : filteredDemandeList[index];
+                      final displayedDemande = filteredDemandeList[index];
 
                       return Card(
                         elevation: 5,
@@ -580,7 +596,7 @@ class _MyHomePageState extends State<UserListPage> {
   Future<void> fetchDetails(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('http://172.20.10.4:8060/api/demande/id/$id'),
+        Uri.parse('http://192.168.11.1:8060/api/demande/id/$id'),
       );
 
       if (response.statusCode == 200) {
