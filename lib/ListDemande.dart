@@ -71,6 +71,59 @@ class _MyHomePageState extends State<MyHomePage> {
     fetchData();
   }
 
+  Future<void> rejectDemande(int id) async {
+    String rejectionReason = '';
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Enter Rejection Reason'),
+          content: TextField(
+            onChanged: (value) {
+              rejectionReason = value;
+            },
+            decoration: const InputDecoration(
+              hintText: 'Enter rejection reason...',
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await sendRejection(id, rejectionReason);
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> sendRejection(int id, String rejectionReason) async {
+    try {
+      final response = await http.put(
+        Uri.parse('http://192.168.168.124:8060/api/demande/reject/$id/$rejectionReason'),
+      );
+
+      if (response.statusCode == 200) {
+        fetchData();
+      } else {
+        throw Exception('Failed to reject demande');
+      }
+    } catch (e) {
+      print('Error rejecting demande: $e');
+    }
+  }
+
+
   Future<void> addDemande() async {
     showDialog(
       context: context,
@@ -86,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> fetchData() async {
     final response =
-        await http.get(Uri.parse('http://192.168.11.1:8060/api/demande/all'));
+        await http.get(Uri.parse('http://192.168.168.124:8060/api/demande/all'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -319,7 +372,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> acceptDemande(int id) async {
     try {
       final response = await http.put(
-        Uri.parse('http://192.168.11.1:8060/api/demande/accept/$id'),
+        Uri.parse('http://192.168.168.124:8060/api/demande/accept/$id'),
       );
 
       if (response.statusCode == 200) {
@@ -332,21 +385,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<void> rejectDemande(int id) async {
-    try {
-      final response = await http.put(
-        Uri.parse('http://192.168.11.1:8060/api/demande/reject/$id'),
-      );
-
-      if (response.statusCode == 200) {
-        fetchData();
-      } else {
-        throw Exception('Failed to reject demande');
-      }
-    } catch (e) {
-      print('Error rejecting demande: $e');
-    }
-  }
+  
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
@@ -361,7 +400,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> fetchDetails(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.11.1:8060/api/demande/id/$id'),
+        Uri.parse('http://192.168.168.124:8060/api/demande/id/$id'),
       );
 
       if (response.statusCode == 200) {
