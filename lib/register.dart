@@ -19,7 +19,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   bool isPasswordVisible = false;
 
   Future<void> registerUser() async {
-    final String url = 'http://192.168.168.124:8060/api/auth/signup';
+    final String url = 'http://192.168.1.2:8060/api/auth/signup';
 
     try {
       final response = await http.post(

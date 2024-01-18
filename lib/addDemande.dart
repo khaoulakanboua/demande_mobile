@@ -25,7 +25,7 @@ class _AddDemandeWidgetState extends State<AddDemandeWidget> {
       final prefs = await SharedPreferences.getInstance();
       int? userId = prefs.getInt('id');
       final response = await http.post(
-        Uri.parse('http://192.168.168.124:8060/api/demande/save'),
+        Uri.parse('http://192.168.1.2:8060/api/demande/save'),
         headers: {
           'Content-Type': 'application/json',
         },

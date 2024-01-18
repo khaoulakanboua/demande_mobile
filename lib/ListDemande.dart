@@ -110,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> sendRejection(int id, String rejectionReason) async {
     try {
       final response = await http.put(
-        Uri.parse('http://192.168.168.124:8060/api/demande/reject/$id/$rejectionReason'),
+        Uri.parse('http://192.168.1.2:8060/api/demande/reject/$id/$rejectionReason'),
       );
 
       if (response.statusCode == 200) {
@@ -139,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> fetchData() async {
     final response =
-        await http.get(Uri.parse('http://192.168.168.124:8060/api/demande/all'));
+        await http.get(Uri.parse('http://192.168.1.2:8060/api/demande/all'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -164,51 +164,57 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> showDetailsModal(DemandeDetails details) async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.info_outline, color: Colors.blue),
-              SizedBox(width: 10),
-              Text('Détails de la Demande',
-                  style: TextStyle(color: Colors.blue)),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildDetailRow(
-                    'Titre', details.titre, Icons.title, Colors.blue),
-                _buildDetailRow('Description', details.description,
-                    Icons.description, Colors.blue),
-                _buildDetailRow(
-                    'Comite', details.comite, Icons.people, Colors.blue),
-                _buildDetailRow(
-                    'Type', details.type, Icons.category, Colors.blue),
-                _buildDetailRow('Etat', details.etat ?? 'N/A',
-                    Icons.check_circle, _getStatusColor(details.etat)),
-                _buildDetailRow('Date de début', _formatDate(details.dateDebut),
-                    Icons.date_range, Colors.blue),
-                _buildDetailRow('Date de fin', _formatDate(details.dateFin),
-                    Icons.date_range, Colors.blue),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Fermer', style: TextStyle(color: Colors.red)),
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.info_outline, color: Colors.blue),
+            SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                'Détails de la Demande',
+                style: TextStyle(color: Colors.blue),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDetailRow(
+                  'Titre', details.titre, Icons.title, Colors.blue),
+              _buildDetailRow('Description', details.description,
+                  Icons.description, Colors.blue),
+              _buildDetailRow(
+                  'Comite', details.comite, Icons.people, Colors.blue),
+              _buildDetailRow(
+                  'Type', details.type, Icons.category, Colors.blue),
+              _buildDetailRow('Etat', details.etat ?? 'N/A',
+                  Icons.check_circle, _getStatusColor(details.etat)),
+              _buildDetailRow('Date de début', _formatDate(details.dateDebut),
+                  Icons.date_range, Colors.blue),
+              _buildDetailRow('Date de fin', _formatDate(details.dateFin),
+                  Icons.date_range, Colors.blue),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Fermer', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   Widget _buildDetailRow(
       String label, String value, IconData icon, Color textColor) {
@@ -372,7 +378,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> acceptDemande(int id) async {
     try {
       final response = await http.put(
-        Uri.parse('http://192.168.168.124:8060/api/demande/accept/$id'),
+        Uri.parse('http://192.168.1.2:8060/api/demande/accept/$id'),
       );
 
       if (response.statusCode == 200) {
@@ -400,7 +406,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> fetchDetails(int id) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.168.124:8060/api/demande/id/$id'),
+        Uri.parse('http://192.168.1.2:8060/api/demande/id/$id'),
       );
 
       if (response.statusCode == 200) {
